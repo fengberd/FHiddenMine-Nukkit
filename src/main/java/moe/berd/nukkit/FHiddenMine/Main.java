@@ -1,20 +1,20 @@
 package moe.berd.nukkit.FHiddenMine;
 
 import cn.nukkit.*;
-import cn.nukkit.blockentity.*;
-import cn.nukkit.event.block.*;
-import cn.nukkit.level.*;
-import cn.nukkit.level.format.ChunkSection;
-import cn.nukkit.level.format.anvil.*;
 import cn.nukkit.nbt.*;
-import cn.nukkit.nbt.tag.*;
-import cn.nukkit.plugin.*;
-import cn.nukkit.event.*;
-import cn.nukkit.event.server.*;
-import cn.nukkit.event.player.*;
-import cn.nukkit.network.protocol.*;
-import cn.nukkit.level.format.generic.*;
+import cn.nukkit.math.*;
 import cn.nukkit.utils.*;
+import cn.nukkit.event.*;
+import cn.nukkit.level.*;
+import cn.nukkit.plugin.*;
+import cn.nukkit.blockentity.*;
+
+import cn.nukkit.nbt.tag.*;
+import cn.nukkit.event.block.*;
+import cn.nukkit.event.player.*;
+import cn.nukkit.level.format.anvil.*;
+import cn.nukkit.level.format.generic.*;
+import cn.nukkit.level.format.ChunkSection;
 
 import java.io.*;
 import java.nio.*;
@@ -23,6 +23,8 @@ import java.util.*;
 public class Main extends PluginBase implements Listener
 {
 	private static Main obj;
+	
+	public static final String PERMISSION_SHOW="FHiddenMine.show";
 	
 	public static Main getInstance()
 	{
@@ -59,7 +61,7 @@ public class Main extends PluginBase implements Listener
 	{
 		Player player=event.getPlayer();
 		Level level=player.getLevel();
-		if(player.hasPermission("FHiddenMine.show") || !protectWorlds.contains(level.getFolderName().toLowerCase()))
+		if(player.hasPermission(PERMISSION_SHOW) || !protectWorlds.contains(level.getFolderName().toLowerCase()))
 		{
 			return;
 		}
@@ -269,29 +271,16 @@ public class Main extends PluginBase implements Listener
 	{
 		Player player=event.getPlayer();
 		Level level=player.getLevel();
-		if(player.hasPermission("FHiddenMine.show") || !protectWorlds.contains(level.getFolderName().toLowerCase()))
+		if(player.hasPermission(PERMISSION_SHOW) || !protectWorlds.contains(level.getFolderName().toLowerCase()))
 		{
 			return;
 		}
-		
-	}
-	
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-	public void onDataPacketSend(DataPacketSendEvent event)
-	{
-		Player player=event.getPlayer();
-		Level level=player.getLevel();
-		DataPacket pk_=event.getPacket();
-		if(player.hasPermission("FHiddenMine.show") || !protectWorlds.contains(level.getFolderName().toLowerCase()))
+		Vector3 pos=event.getBlock();
+		level.sendBlocks(new Player[]{player},new Vector3[]
 		{
-			return;
-		}
-		/*
-		// TODO: Check if there's some ores should be hide when UpdateBlockPacket
-		if(pk_ instanceof UpdateBlockPacket)
-		{
-		
-		}
-		*/
+			pos.add(1),pos.add(-1),
+			pos.add(0,1),pos.add(0,-1),
+			pos.add(0,0,1),pos.add(0,0,-1)
+		});
 	}
 }
